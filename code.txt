@@ -1,0 +1,137 @@
+import "./styles.css";
+import React, { Component } from "react";
+import { Autocomplete } from "@material-ui/lab";
+import { Checkbox, TextField, IconButton } from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+
+export default function App() {
+  return (
+    <div className="App">
+      <h1>Hello CodeSandbox</h1>
+      <h2>Start editing to see some magic happen!</h2>
+      <MyComponent />
+    </div>
+  );
+}
+
+class MyComponent extends Component {
+  state = {
+    aiAllOptions: [
+      { id: 1, name: "Option 1" },
+      { id: 2, name: "Option 2" },
+      { id: 3, name: "Option 3" },
+      { id: 4, name: "Option 4" },
+      { id: 5, name: "Option 5" },
+    ],
+    selectedOptions: [],
+    iconToggle: false,
+    allSelected: false,
+  };
+
+  // Toggle icon state when dropdown is opened or closed
+  onChangeIcon = () => {
+    this.setState((prevState) => ({
+      iconToggle: !prevState.iconToggle,
+    }));
+  };
+
+  // Handle selecting or deselecting all options
+  handleSelectAll = (isSelected) => {
+    if (isSelected) {
+      this.setState(
+        { selectedOptions: this.state.aiAllOptions, allSelected: true },
+        () => {
+          this.handleChangeAction(this.state.selectedOptions);
+        }
+      );
+    } else {
+      this.setState({ selectedOptions: [], allSelected: false }, () => {
+        this.handleChangeAction(this.state.selectedOptions);
+      });
+    }
+  };
+
+  // Handle the change in selected options
+  handleChangeAction = (selectedOptions) => {
+    // Your action on change
+    console.log("Selected options: ", selectedOptions);
+  };
+
+  render() {
+    const { aiAllOptions, selectedOptions, iconToggle, allSelected } =
+      this.state;
+    const selectAllOption = { name: "Select All" };
+
+    return (
+      <Autocomplete
+        multiple
+        id="checkboxes-tags-demo"
+        options={[selectAllOption, ...aiAllOptions]}
+        disableCloseOnSelect
+        open={iconToggle}
+        onOpen={this.onChangeIcon}
+        onClose={this.onChangeIcon}
+        onChange={(event, value) => {
+          const isSelectAllIncluded = value.some(
+            (option) => option.name === "Select All"
+          );
+
+          if (isSelectAllIncluded) {
+            // If "Select All" is selected, handle it
+            this.handleSelectAll(!allSelected);
+          } else {
+            // Unselect "Select All" if any individual option is deselected
+            const areAllOptionsSelected = value.length === aiAllOptions.length;
+            this.setState(
+              {
+                selectedOptions: value,
+                allSelected: areAllOptionsSelected,
+              },
+              () => {
+                this.handleChangeAction(this.state.selectedOptions);
+              }
+            );
+          }
+        }}
+        value={selectedOptions}
+        getOptionLabel={(option) => option.name}
+        renderOption={(option, { selected }) => (
+          <>
+            <Checkbox
+              checked={option.name === "Select All" ? allSelected : selected}
+              style={{ marginRight: 8 }}
+            />
+            {option.name}
+          </>
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            placeholder="Choose option"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <IconButton
+                  onClick={this.onChangeIcon}
+                  style={{
+                    padding: "0",
+                    marginRight: "-50px",
+                  }}
+                >
+                  {iconToggle ? (
+                    <ExpandLessIcon style={{ color: "rgba(20, 16, 30, 1)" }} />
+                  ) : (
+                    <ExpandMoreIcon style={{ color: "rgba(20, 16, 30, 1)" }} />
+                  )}
+                </IconButton>
+              ),
+            }}
+          />
+        )}
+      />
+    );
+  }
+}
+
